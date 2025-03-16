@@ -52,13 +52,14 @@
 
     #chatbox {
       width: 100%;
-      height: 250px;
+      height: 400px; /* Increased the height */
       overflow-y: auto;
       background: #2a2a2a;
       padding: 10px;
       border-radius: 5px;
       margin-top: 10px;
       overflow-wrap: break-word;
+      white-space: pre-wrap;
     }
 
     input, button {
@@ -193,23 +194,29 @@
       blood_pressure: 0
     };
 
-    async function sendChatMessage(message) {
+    async function sendMessage() {
+      const userInput = document.getElementById('userInput').value;
       const chatbox = document.getElementById('chatbox');
-      chatbox.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+      
+      // Display the user's message in the chatbox
+      chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
       chatbox.scrollTop = chatbox.scrollHeight;
 
-      // Fetching response from Hugging Face API
-      let response = await fetchHuggingFaceResponse(message);
+      // Fetch response from Hugging Face API
+      let response = await fetchHuggingFaceResponse(userInput);
       
-      if (message.toLowerCase().includes('biomarkers') || message.toLowerCase().includes('health')) {
+      // If the message is related to biomarkers, analyze the data
+      if (userInput.toLowerCase().includes('biomarkers') || userInput.toLowerCase().includes('health')) {
         response = analyzeBiomarkers(userData);
       }
 
+      // Display the chatbot's response
       chatbox.innerHTML += `<p><strong>Afiba:</strong> ${response}</p>`;
       chatbox.scrollTop = chatbox.scrollHeight;
       speakText(response);
     }
 
+    // Analyze the biomarker data
     function analyzeBiomarkers(data) {
       let analysis = "Here is an analysis of your biomarkers:\n";
 
@@ -253,7 +260,7 @@
     }
 
     // Fetch response from Hugging Face API
-    async function fetchHuggingFaceResponse(message) {
+    async function fetchHuggingFaceResponse(userInput) {
       const response = await fetch('https://api-inference.huggingface.co/models/gpt-3.5-turbo', {
         method: 'POST',
         headers: {
@@ -261,60 +268,17 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          inputs: message
+          inputs: userInput
         })
       });
       const data = await response.json();
-      return data.choices[0].message.content;
+      return data[0].generated_text || "Sorry, I didn't quite understand that.";
     }
 
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
-    }
-
-    function sendMessage() {
-      const userInput = document.getElementById('userInput').value;
-      if (userInput) {
-        sendChatMessage(userInput);
-        document.getElementById('userInput').value = '';
-      }
-    }
-
-    // Voice recognition function
-    function startVoiceRecognition() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.start();
-
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('userInput').value = transcript;
-        sendMessage();
-      };
-    }
-
-    // Save biomarker data
-    function saveData() {
-      userData.food = document.getElementById('food').value;
-      userData.supplements = document.getElementById('supplements').value;
-      userData.sleep = document.getElementById('sleep').value;
-      userData.exercise = document.getElementById('exercise').value;
-      userData.hrv = document.getElementById('hrv').value;
-      userData.blood_glucose = document.getElementById('blood_glucose').value;
-      userData.testosterone = document.getElementById('testosterone').value;
-      userData.vitamin_d = document.getElementById('vitamin_d').value;
-      userData.cholesterol = document.getElementById('cholesterol').value;
-      userData.blood_pressure = document.getElementById('blood_pressure').value;
-
-      alert('Biomarker data saved successfully!');
-    }
-
-    // Function to speak text
+    // Function to convert text to speech
     function speakText(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      speechSynthesis.speak(utterance);
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
     }
   </script>
 </body>

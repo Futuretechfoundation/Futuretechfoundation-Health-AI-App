@@ -1,367 +1,156 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Heart, Droplet, Clock, Moon, Coffee, Zap, MessageSquare, Bot } from 'lucide-react';
-
-// Biological Age AI Algorithm
-const calculateBiologicalAge = (data) => {
-  // Base age from chronological age
-  let bioAge = data.chronologicalAge;
-  
-  // Health factors impact (simplified algorithm)
-  // Sleep quality impact (-0.1 to +0.3 years)
-  const sleepImpact = (7 - data.sleepHours) * 0.1;
-  
-  // Exercise impact (-0.5 to +0.3 years)
-  const exerciseImpact = data.exerciseMinutes >= 150 ? 
-    -0.5 : (150 - data.exerciseMinutes) / 300;
-  
-  // Diet impact (-0.4 to +0.4 years)
-  const dietScore = data.dietQuality;
-  const dietImpact = (5 - dietScore) * 0.2;
-  
-  // Stress impact (0 to +0.5 years)
-  const stressImpact = data.stressLevel * 0.1;
-  
-  // Habits impact (0 to +0.8 years)
-  const habitsImpact = (data.smoking ? 0.5 : 0) + 
-    (data.alcoholConsumption > 7 ? 0.3 : data.alcoholConsumption / 30);
-  
-  // Combine all factors
-  bioAge += sleepImpact + exerciseImpact + dietImpact + stressImpact + habitsImpact;
-  
-  // Round to 1 decimal place
-  return Math.round(bioAge * 10) / 10;
-};
-
-// Main component
-const HolographicAgeAnalyzer = () => {
-  // State for user data
-  const [userData, setUserData] = useState({
-    chronologicalAge: 35,
-    sleepHours: 7,
-    exerciseMinutes: 120,
-    dietQuality: 3.5, // Scale 1-5
-    stressLevel: 3, // Scale 1-5
-    smoking: false,
-    alcoholConsumption: 3 // Drinks per week
-  });
-  
-  // Biological age calculation
-  const [biologicalAge, setBiologicalAge] = useState(0);
-  
-  // Animation state
-  const [analyzing, setAnalyzing] = useState(false);
-  const [scanRotation, setScanRotation] = useState(0);
-  
-  // Afiba AI assistant state
-  const [showAfiba, setShowAfiba] = useState(true);
-  const [afibaMessage, setAfibaMessage] = useState("Hello, I'm Afiba. I'll help analyze your biological age and provide personalized health insights.");
-  const [animateAfiba, setAnimateAfiba] = useState(true);
-  
-  // Update biological age when user data changes
-  useEffect(() => {
-    setBiologicalAge(calculateBiologicalAge(userData));
-  }, [userData]);
-  
-  // Afiba animation effect
-  useEffect(() => {
-    if (animateAfiba) {
-      const timer = setTimeout(() => {
-        setAnimateAfiba(false);
-      }, 1000);
-      return () => clearTimeout(timer);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FutureTech Health App</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f4f4f4;
     }
-  }, [animateAfiba]);
-  
-  // Scanning animation
-  useEffect(() => {
-    let animationFrame;
-    if (analyzing) {
-      const animate = () => {
-        setScanRotation(prev => (prev + 1) % 360);
-        animationFrame = requestAnimationFrame(animate);
-      };
-      animationFrame = requestAnimationFrame(animate);
-      
-      // Auto-stop analysis after 3 seconds
-      const timer = setTimeout(() => {
-        setAnalyzing(false);
-      }, 3000);
-      
-      return () => {
-        cancelAnimationFrame(animationFrame);
-        clearTimeout(timer);
-      };
+
+    #chatbot-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-  }, [analyzing]);
-  
-  // Handle form input changes
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setUserData({
-      ...userData,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) : value
-    });
-  };
-  
-  // Handle analyze button click
-  const handleAnalyze = () => {
-    setAnalyzing(true);
-    setAnimateAfiba(true);
-    
-    // Update Afiba's message during analysis
-    setAfibaMessage("Scanning your health data and analyzing biological markers...");
-    
-    // Update Afiba's message after analysis completes
-    setTimeout(() => {
-      const ageDiff = biologicalAge - userData.chronologicalAge;
-      let message = "";
-      
-      if (ageDiff <= -3) {
-        message = "Excellent results! Your lifestyle choices are having a significant positive impact on your biological age. Keep up the great work!";
-      } else if (ageDiff < 0) {
-        message = "Good news! Your body is functioning younger than your chronological age. Your healthy habits are paying off.";
-      } else if (ageDiff === 0) {
-        message = "Your biological age matches your chronological age. This is normal, but there's room to improve with some lifestyle adjustments.";
-      } else if (ageDiff <= 2) {
-        message = "Your body is aging slightly faster than optimal. I recommend focusing on improving your sleep quality and exercise routine.";
-      } else {
-        message = "Your biological age is higher than ideal. Let's work together on a personalized plan to improve your health metrics.";
-      }
-      
-      setAfibaMessage(message);
-    }, 3000);
-  };
-  
-  // Calculate difference from chronological age
-  const ageDifference = biologicalAge - userData.chronologicalAge;
-  
-  // Determine health status message
-  const getHealthMessage = () => {
-    if (ageDifference <= -3) return "Exceptional! Your biological age is significantly lower than your chronological age.";
-    if (ageDifference < 0) return "Great! Your body is functioning younger than your actual age.";
-    if (ageDifference === 0) return "Your biological age matches your chronological age.";
-    if (ageDifference <= 2) return "Your body is aging slightly faster than optimal.";
-    return "Your body is aging faster than optimal. Consider lifestyle adjustments.";
-  };
-  
-  return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-black bg-opacity-90 text-blue-300 rounded-lg shadow-2xl border border-blue-500">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
-          Holographic Biological Age Analyzer
-        </h1>
-        <p className="text-blue-300 opacity-80">
-          Advanced AI analysis of your biological age based on health metrics
-        </p>
-      </div>
-      
-      {/* 3D Holographic Visualization */}
-      <div className="relative h-64 mb-8 flex items-center justify-center overflow-hidden">
-        <div className={`absolute inset-0 flex items-center justify-center ${analyzing ? 'opacity-100' : 'opacity-30'}`}>
-          {/* Holographic rings */}
-          <div className="absolute w-48 h-48 rounded-full border-4 border-blue-500 opacity-50 animate-pulse"></div>
-          <div className="absolute w-64 h-64 rounded-full border-2 border-cyan-400 opacity-30" 
-               style={{transform: `rotate(${scanRotation}deg)`}}></div>
-          <div className="absolute w-72 h-72 rounded-full border border-blue-300 opacity-20"
-               style={{transform: `rotate(${-scanRotation * 0.5}deg)`}}></div>
-          
-          {/* Display age in center */}
-          <div className="z-10 text-center">
-            <div className="flex justify-center items-center gap-4">
-              <div className="text-center">
-                <p className="text-sm text-blue-400">Chronological</p>
-                <p className="text-4xl font-bold text-white">{userData.chronologicalAge}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-blue-400">Biological</p>
-                <p className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-cyan-300 to-blue-600">
-                  {analyzing ? "..." : biologicalAge}
-                </p>
-              </div>
-            </div>
-            {!analyzing && (
-              <div className="mt-4 text-sm">
-                <span className={`font-bold ${ageDifference < 0 ? 'text-green-400' : ageDifference > 0 ? 'text-red-400' : 'text-blue-400'}`}>
-                  {ageDifference < 0 ? `${Math.abs(ageDifference)} years younger` : 
-                   ageDifference > 0 ? `${ageDifference} years older` : 
-                   "Same as chronological age"}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Scanning overlay */}
-        {analyzing && (
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-500 opacity-20 animate-pulse"></div>
-        )}
-        
-        {/* Scan line */}
-        {analyzing && (
-          <div className="absolute h-1 bg-cyan-400 left-0 right-0" 
-               style={{top: `${50 + Math.sin(scanRotation * 0.1) * 40}%`, opacity: 0.7}}></div>
-        )}
-      </div>
-      
-      {/* Health status message */}
-      {!analyzing && (
-        <div className="text-center mb-8">
-          <p className="text-lg font-medium text-blue-200">{getHealthMessage()}</p>
-        </div>
-      )}
-      
-      {/* Input Form */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="space-y-4">
-          <h2 className="text-xl text-blue-200 flex items-center gap-2">
-            <Clock size={20} />
-            <span>Basic Information</span>
-          </h2>
-          
-          <div className="space-y-2">
-            <label className="block text-blue-300 text-sm">Chronological Age</label>
-            <input
-              type="number"
-              name="chronologicalAge"
-              value={userData.chronologicalAge}
-              onChange={handleChange}
-              className="w-full bg-blue-900 bg-opacity-20 text-blue-100 rounded border border-blue-500 px-3 py-2"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-blue-300 text-sm flex items-center gap-1">
-              <Moon size={16} />
-              <span>Average Sleep (hours/day)</span>
-            </label>
-            <input
-              type="number"
-              name="sleepHours"
-              min="0"
-              max="12"
-              step="0.5"
-              value={userData.sleepHours}
-              onChange={handleChange}
-              className="w-full bg-blue-900 bg-opacity-20 text-blue-100 rounded border border-blue-500 px-3 py-2"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-blue-300 text-sm flex items-center gap-1">
-              <Activity size={16} />
-              <span>Weekly Exercise (minutes)</span>
-            </label>
-            <input
-              type="number"
-              name="exerciseMinutes"
-              min="0"
-              max="1000"
-              value={userData.exerciseMinutes}
-              onChange={handleChange}
-              className="w-full bg-blue-900 bg-opacity-20 text-blue-100 rounded border border-blue-500 px-3 py-2"
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <h2 className="text-xl text-blue-200 flex items-center gap-2">
-            <Heart size={20} />
-            <span>Lifestyle Factors</span>
-          </h2>
-          
-          <div className="space-y-2">
-            <label className="block text-blue-300 text-sm flex items-center gap-1">
-              <Droplet size={16} />
-              <span>Diet Quality (1-5)</span>
-            </label>
-            <input
-              type="range"
-              name="dietQuality"
-              min="1"
-              max="5"
-              step="0.5"
-              value={userData.dietQuality}
-              onChange={handleChange}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-blue-400">
-              <span>Poor</span>
-              <span>Average</span>
-              <span>Excellent</span>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block text-blue-300 text-sm flex items-center gap-1">
-              <Zap size={16} />
-              <span>Stress Level (1-5)</span>
-            </label>
-            <input
-              type="range"
-              name="stressLevel"
-              min="1"
-              max="5"
-              step="0.5"
-              value={userData.stressLevel}
-              onChange={handleChange}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-blue-400">
-              <span>Low</span>
-              <span>Moderate</span>
-              <span>High</span>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="smoking"
-                checked={userData.smoking}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              <label className="text-blue-300 text-sm">Smoker</label>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="block text-blue-300 text-sm flex items-center gap-1">
-                <Coffee size={16} />
-                <span>Alcohol (drinks/week)</span>
-              </label>
-              <input
-                type="number"
-                name="alcoholConsumption"
-                min="0"
-                max="50"
-                value={userData.alcoholConsumption}
-                onChange={handleChange}
-                className="w-full bg-blue-900 bg-opacity-20 text-blue-100 rounded border border-blue-500 px-3 py-2"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Analysis Button */}
-      <div className="text-center">
-        <button
-          onClick={handleAnalyze}
-          disabled={analyzing}
-          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-400 text-white font-bold rounded-full hover:from-blue-700 hover:to-cyan-500 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-blue-500/30"
-        >
-          {analyzing ? "Analyzing..." : "Analyze Biological Age"}
-        </button>
-      </div>
-      
-      {/* Technical footer */}
-      <div className="mt-8 pt-4 border-t border-blue-800 text-xs text-blue-500 text-center">
-        <p>Holographic Analysis System v2.0 • AI-Powered Health Metrics</p>
-        <p className="mt-1">Using advanced biological age algorithms with real-time health data processing</p>
-      </div>
+
+    #afiba-avatar {
+      width: 400px;
+      height: 400px;
+      background-color: #ccc;
+      object-fit: contain;
+    }
+
+    #data-entry {
+      margin-top: 20px;
+    }
+
+    input {
+      margin: 5px;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="chatbot-container">
+    <!-- Replace the canvas with an image tag -->
+    <img id="afiba-avatar" src="images/Afiba.jpg" alt="Afiba Avatar">
+
+    <div id="data-entry">
+      <label for="food">Food:</label>
+      <input type="text" id="food" placeholder="Enter food">
+      <label for="supplements">Supplements:</label>
+      <input type="text" id="supplements" placeholder="Enter supplements">
+      <label for="sleep">Sleep (hrs):</label>
+      <input type="number" id="sleep" placeholder="Enter hours of sleep">
+      <label for="exercise">Exercise (mins):</label>
+      <input type="number" id="exercise" placeholder="Enter minutes of exercise">
+      <button onclick="saveData()">Save Data</button>
     </div>
-  );
-};
+  </div>
 
-export default HolographicAgeAnalyzer;
+  <script>
+    // JavaScript for Health App
+    let userData = {
+      food: "",
+      supplements: "",
+      sleep: 0,
+      exercise: 0
+    };
+
+    // Save data locally in the browser
+    function saveData() {
+      userData.food = document.getElementById('food').value;
+      userData.supplements = document.getElementById('supplements').value;
+      userData.sleep = parseInt(document.getElementById('sleep').value);
+      userData.exercise = parseInt(document.getElementById('exercise').value);
+
+      localStorage.setItem('userData', JSON.stringify(userData));
+      analyzeData(userData);
+    }
+
+    // Analyze the data through Afiba's avatar
+    function analyzeData(data) {
+      const analysis = `Food: ${data.food}, Supplements: ${data.supplements}, Sleep: ${data.sleep} hours, Exercise: ${data.exercise} minutes.`;
+      alert(`Afiba is analyzing: ${analysis}`);
+      // Logic for analysis (this can be expanded later)
+    }
+
+    // Initialize app
+    window.onload = function() {
+      const savedData = JSON.parse(localStorage.getItem('userData'));
+      if (savedData) {
+        userData = savedData;
+      }
+    };
+  </script>
+
+  <script>
+    // Service Worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
+  </script>
+</body>
+</html>
+
+<!-- Manifest -->
+<script type="application/json" id="manifest">
+  {
+    "name": "FutureTech Health App",
+    "short_name": "Health App",
+    "description": "Track and analyze health data with Afiba's chatbot.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4CAF50",
+    "icons": [
+      {
+        "src": "/assets/icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/assets/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+</script>
+
+<!-- Service Worker -->
+<script type="text/javascript" id="service-worker">
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+      console.log('Service Worker registered with scope: ', registration.scope);
+    }).catch(function(error) {
+      console.log('Service Worker registration failed: ', error);
+    });
+  }
+</script>

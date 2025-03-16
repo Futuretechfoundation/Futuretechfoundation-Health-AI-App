@@ -29,6 +29,7 @@
       background: #1e1e1e;
       border-radius: 10px;
       box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+      margin-top: 20px;
     }
 
     #afiba-avatar {
@@ -50,6 +51,7 @@
       padding: 10px;
       border-radius: 5px;
       margin-top: 10px;
+      overflow-wrap: break-word;
     }
 
     input, button {
@@ -106,12 +108,17 @@
       width: 100%;
     }
 
-    #chatbot-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      padding: 20px;
-      align-items: center;
+    #microphone {
+      background: #4CAF50;
+      padding: 15px;
+      border-radius: 50%;
+      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    #microphone:hover {
+      background: #45a049;
     }
 
   </style>
@@ -119,12 +126,12 @@
 <body>
   <div id="chatbot-container">
     <img id="afiba-avatar" src="images/Afiba.jpg" alt="Afiba Avatar">
-
+    
     <div id="chatbox"></div>
 
     <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
     <button onclick="sendMessage()">Send</button>
-    <button onclick="startVoiceRecognition()">🎤 Speak</button>
+    <div id="microphone" onclick="startVoiceRecognition()">🎤</div>
 
     <div id="data-entry">
       <h3>Enter Biomarkers:</h3>
@@ -244,23 +251,19 @@
       userData.vitamin_d = parseInt(document.getElementById('vitamin_d').value);
       userData.cholesterol = parseInt(document.getElementById('cholesterol').value);
       userData.blood_pressure = parseInt(document.getElementById('blood_pressure').value);
-
-      alert("Biomarker data saved!");
     }
 
     function startVoiceRecognition() {
-      if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = "en-US";
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
 
-        recognition.onresult = (event) => {
-          const speech = event.results[0][0].transcript;
-          document.getElementById("userInput").value = speech;
-          sendMessage();
-        };
-
-        recognition.start();
+      recognition.onresult = function(event) {
+        const userSpeech = event.results[0][0].transcript;
+        document.getElementById('userInput').value = userSpeech;
+        sendChatMessage(userSpeech);
       }
+
+      recognition.start();
     }
 
     function handleKeyPress(event) {
@@ -271,9 +274,10 @@
 
     function speakText(text) {
       const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = "en-US";
+      speech.lang = 'en-US';
       window.speechSynthesis.speak(speech);
     }
+
   </script>
 </body>
 </html>

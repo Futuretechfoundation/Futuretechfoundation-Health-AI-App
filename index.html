@@ -36,6 +36,7 @@
       height: 150px;
       border-radius: 50%;
       object-fit: cover;
+      margin-top: 20px; /* Added margin to prevent cutting off */
     }
 
     #chatbox {
@@ -70,6 +71,14 @@
 
     button:hover {
       background: #45a049;
+    }
+
+    #data-entry {
+      margin-top: 20px;
+    }
+
+    #data-entry input {
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -135,7 +144,7 @@
     }
 
     async function fetchHuggingFaceResponse(message) {
-      const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+      const response = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -205,4 +214,4 @@
     }
   </script>
 </body>
-  </html>
+</html>

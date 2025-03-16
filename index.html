@@ -138,9 +138,42 @@
       chatbox.scrollTop = chatbox.scrollHeight;
 
       let response = await fetchHuggingFaceResponse(message);
+      if (message.toLowerCase().includes('biomarkers') || message.toLowerCase().includes('health')) {
+        response = analyzeBiomarkers(userData);
+      }
       chatbox.innerHTML += `<p><strong>Afiba:</strong> ${response}</p>`;
       chatbox.scrollTop = chatbox.scrollHeight;
       speakText(response);
+    }
+
+    function analyzeBiomarkers(data) {
+      let analysis = "Here is an analysis of your biomarkers:\n";
+
+      if (data.hrv < 40) {
+        analysis += "- Your HRV is low, which might indicate high stress. Try incorporating more relaxation techniques.\n";
+      } else {
+        analysis += "- Your HRV is within a healthy range. Great job on managing stress!\n";
+      }
+
+      if (data.blood_glucose > 100) {
+        analysis += "- Your blood glucose is on the higher side. It could be useful to focus on a balanced diet and regular exercise.\n";
+      } else {
+        analysis += "- Your blood glucose levels are in a healthy range.\n";
+      }
+
+      if (data.testosterone < 300) {
+        analysis += "- Your testosterone levels are low. Consider consulting a healthcare provider for advice on boosting testosterone.\n";
+      } else {
+        analysis += "- Your testosterone levels are healthy.\n";
+      }
+
+      if (data.vitamin_d < 30) {
+        analysis += "- Your Vitamin D is low. You may need more sunlight exposure or supplements.\n";
+      } else {
+        analysis += "- Your Vitamin D levels are in a healthy range.\n";
+      }
+
+      return analysis;
     }
 
     async function fetchHuggingFaceResponse(message) {

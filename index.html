@@ -33,12 +33,6 @@
       margin-bottom: 20px;
     }
 
-    iframe {
-      width: 100%;
-      height: 430px;
-      border: none;
-    }
-
     #voice-btn {
       padding: 10px;
       background-color: #4CAF50;
@@ -57,14 +51,22 @@
 
   <div id="chat-container">
     <!-- Afiba Avatar -->
-    <img id="afiba-avatar" src="images/Afiba.jpg" alt="Afiba Avatar">
+    <img id="afiba-avatar" src="https://i.postimg.cc/nhv5fH5h/Afiba.jpg" alt="Afiba Avatar">
 
-    <!-- Google Dialogflow Chatbot -->
-    <iframe src="https://bot.dialogflow.com/57cd907d-c2ec-483e-ae2a-c4a6cf2cac5c"></iframe>
+    <!-- Dialogflow Messenger Integration -->
+    <df-messenger
+      chat-icon="https://i.postimg.cc/nhv5fH5h/Afiba.jpg"
+      chat-title="Afiba"
+      agent-id="57cd907d-c2ec-483e-ae2a-c4a6cf2cac5c"
+      language-code="en"
+    ></df-messenger>
 
     <!-- Voice Interaction Button -->
     <button id="voice-btn">🎤 Talk to Afiba</button>
   </div>
+
+  <!-- Dialogflow Messenger Script -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 
   <script>
     // Web Speech API for Voice Interaction

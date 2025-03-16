@@ -6,10 +6,14 @@
   <title>FutureTech Health App</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -17,20 +21,23 @@
       height: 100vh;
       background: #121212;
       color: #fff;
+      overflow: hidden;
     }
 
     #chatbot-container {
-      width: 90%;
+      width: 100%;
       max-width: 500px;
       display: flex;
       flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
       padding: 20px;
       background: #1e1e1e;
       border-radius: 10px;
       box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
       margin-top: 20px;
-      box-sizing: border-box; /* Add this to include padding in the height calculation */
+      height: 90vh;
+      overflow-y: auto;
     }
 
     #afiba-avatar {
@@ -38,18 +45,9 @@
       height: 150px;
       border-radius: 50%;
       object-fit: cover;
-      margin-top: 20px;
       margin-bottom: 20px;
       border: 4px solid #4CAF50;
       box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
-    }
-
-    /* Add media queries for mobile devices */
-    @media (max-width: 600px) {
-      #afiba-avatar {
-        width: 100px; /* Adjust the size for mobile */
-        height: 100px; /* Adjust the size for mobile */
-      }
     }
 
     #chatbox {
@@ -61,7 +59,6 @@
       border-radius: 5px;
       margin-top: 10px;
       overflow-wrap: break-word;
-      box-sizing: border-box; /* Add this to include padding in the height calculation */
     }
 
     input, button {
@@ -129,6 +126,27 @@
 
     #microphone:hover {
       background: #45a049;
+    }
+
+    @media (max-width: 600px) {
+      #chatbot-container {
+        width: 100%;
+        padding: 15px;
+      }
+
+      #afiba-avatar {
+        width: 120px;
+        height: 120px;
+      }
+
+      input, button {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .biomarker-inputs input {
+        width: 100%;
+      }
     }
 
   </style>
@@ -253,41 +271,22 @@
     function saveData() {
       userData.food = document.getElementById('food').value;
       userData.supplements = document.getElementById('supplements').value;
-      userData.sleep = parseInt(document.getElementById('sleep').value);
-      userData.exercise = parseInt(document.getElementById('exercise').value);
-      userData.hrv = parseInt(document.getElementById('hrv').value);
-      userData.blood_glucose = parseInt(document.getElementById('blood_glucose').value);
-      userData.testosterone = parseInt(document.getElementById('testosterone').value);
-      userData.vitamin_d = parseInt(document.getElementById('vitamin_d').value);
-      userData.cholesterol = parseInt(document.getElementById('cholesterol').value);
-      userData.blood_pressure = parseInt(document.getElementById('blood_pressure').value);
-    }
-
-    function startVoiceRecognition() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-
-      recognition.onresult = function(event) {
-        const userSpeech = event.results[0][0].transcript;
-        document.getElementById('userInput').value = userSpeech;
-        sendChatMessage(userSpeech);
-      }
-
-      recognition.start();
-    }
-
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
+      userData.sleep = document.getElementById('sleep').value;
+      userData.exercise = document.getElementById('exercise').value;
+      userData.hrv = document.getElementById('hrv').value;
+      userData.blood_glucose = document.getElementById('blood_glucose').value;
+      userData.testosterone = document.getElementById('testosterone').value;
+      userData.vitamin_d = document.getElementById('vitamin_d').value;
+      userData.cholesterol = document.getElementById('cholesterol').value;
+      userData.blood_pressure = document.getElementById('blood_pressure').value;
+      alert("Biomarker data saved!");
     }
 
     function speakText(text) {
-      const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = 'en-US';
-      window.speechSynthesis.speak(speech);
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
     }
 
   </script>
 </body>
-  </html>
+</html>

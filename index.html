@@ -32,15 +32,15 @@
     }
 
     #afiba-avatar {
-      width: 100px;
-      height: 100px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
-      object-fit: contain;
+      object-fit: cover;
     }
 
     #chatbox {
       width: 100%;
-      height: 200px;
+      height: 250px;
       overflow-y: auto;
       background: #2a2a2a;
       padding: 10px;
@@ -120,35 +120,39 @@
       userData.vitamin_d = parseInt(document.getElementById('vitamin_d').value);
 
       localStorage.setItem('userData', JSON.stringify(userData));
-      sendChatMessage(`Health data saved. HRV: ${userData.hrv}ms, Glucose: ${userData.blood_glucose}mg/dL.`);
+      sendChatMessage(`Health data saved! HRV: ${userData.hrv}ms, Glucose: ${userData.blood_glucose}mg/dL.`);
     }
 
-    function sendChatMessage(message) {
+    async function sendChatMessage(message) {
       const chatbox = document.getElementById('chatbox');
-      chatbox.innerHTML += `<p><strong>Afiba:</strong> ${message}</p>`;
+      chatbox.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
       chatbox.scrollTop = chatbox.scrollHeight;
-      speakText(message);
+
+      let response = await fetchChatGPTResponse(message);
+      chatbox.innerHTML += `<p><strong>Afiba:</strong> ${response}</p>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+      speakText(response);
     }
 
-    function sendMessage() {
-      const input = document.getElementById('userInput');
-      const message = input.value.trim();
-      if (message === "") return;
+    async function fetchChatGPTResponse(message) {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer
 
-      document.getElementById('chatbox').innerHTML += `<p><strong>You:</strong> ${message}</p>`;
-      input.value = "";
+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
 
-      if (message.includes("how are you")) {
-        sendChatMessage("I'm great! How can I assist with your health today?");
-      } else {
-        sendChatMessage("Interesting! Tell me more.");
-      }
-    }
+ `
+        },
+        body: JSON.stringify({
+          model: "gpt-4-turbo",
+          messages: [{ role: "system", content: "You are Afiba, an AI health assistant." }, { role: "user", content: message }]
+        })
+      });
 
-    function handleKeyPress(event) {
-      if (event.key === "Enter") {
-        sendMessage();
-      }
+      const data = await response.json();
+      return data.choices[0].message.content;
     }
 
     function speakText(text) {
@@ -166,12 +170,26 @@
       recognition.onresult = function(event) {
         const voiceInput = event.results[0][0].transcript;
         document.getElementById('userInput').value = voiceInput;
-        sendMessage();
+        sendChatMessage(voiceInput);
       };
 
       recognition.onerror = function(event) {
         sendChatMessage("Sorry, I didn't catch that.");
       };
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (message === "") return;
+      input.value = "";
+      sendChatMessage(message);
     }
 
     window.onload = function() {

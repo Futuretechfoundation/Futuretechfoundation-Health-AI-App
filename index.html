@@ -11,93 +11,169 @@
       margin: 0;
       padding: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #f4f4f4;
+      background: #121212;
+      color: #fff;
     }
 
     #chatbot-container {
+      width: 90%;
+      max-width: 500px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
     }
 
     #afiba-avatar {
-      width: 400px;
-      height: 400px;
-      background-color: #ccc;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
       object-fit: contain;
     }
 
-    #data-entry {
-      margin-top: 20px;
+    #chatbox {
+      width: 100%;
+      height: 200px;
+      overflow-y: auto;
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      margin-top: 5px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
     }
 
     input {
-      margin: 5px;
-      padding: 10px;
+      background: #333;
+      color: white;
     }
 
     button {
-      padding: 10px;
-      background-color: #4CAF50;
+      background: #4CAF50;
       color: white;
-      border: none;
       cursor: pointer;
     }
 
     button:hover {
-      background-color: #45a049;
+      background: #45a049;
     }
   </style>
 </head>
 <body>
   <div id="chatbot-container">
-    <!-- Replace the canvas with an image tag -->
     <img id="afiba-avatar" src="images/Afiba.jpg" alt="Afiba Avatar">
 
+    <div id="chatbox"></div>
+
+    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="startVoiceRecognition()">🎤 Speak</button>
+
     <div id="data-entry">
-      <label for="food">Food:</label>
-      <input type="text" id="food" placeholder="Enter food">
-      <label for="supplements">Supplements:</label>
-      <input type="text" id="supplements" placeholder="Enter supplements">
-      <label for="sleep">Sleep (hrs):</label>
-      <input type="number" id="sleep" placeholder="Enter hours of sleep">
-      <label for="exercise">Exercise (mins):</label>
-      <input type="number" id="exercise" placeholder="Enter minutes of exercise">
+      <h3>Enter Biomarkers:</h3>
+      <input type="text" id="food" placeholder="Food">
+      <input type="text" id="supplements" placeholder="Supplements">
+      <input type="number" id="sleep" placeholder="Sleep (hrs)">
+      <input type="number" id="exercise" placeholder="Exercise (mins)">
+      <input type="number" id="hrv" placeholder="HRV (ms)">
+      <input type="number" id="blood_glucose" placeholder="Blood Glucose (mg/dL)">
+      <input type="number" id="testosterone" placeholder="Testosterone (ng/dL)">
+      <input type="number" id="vitamin_d" placeholder="Vitamin D (ng/mL)">
       <button onclick="saveData()">Save Data</button>
     </div>
   </div>
 
   <script>
-    // JavaScript for Health App
     let userData = {
       food: "",
       supplements: "",
       sleep: 0,
-      exercise: 0
+      exercise: 0,
+      hrv: 0,
+      blood_glucose: 0,
+      testosterone: 0,
+      vitamin_d: 0
     };
 
-    // Save data locally in the browser
     function saveData() {
       userData.food = document.getElementById('food').value;
       userData.supplements = document.getElementById('supplements').value;
       userData.sleep = parseInt(document.getElementById('sleep').value);
       userData.exercise = parseInt(document.getElementById('exercise').value);
+      userData.hrv = parseInt(document.getElementById('hrv').value);
+      userData.blood_glucose = parseInt(document.getElementById('blood_glucose').value);
+      userData.testosterone = parseInt(document.getElementById('testosterone').value);
+      userData.vitamin_d = parseInt(document.getElementById('vitamin_d').value);
 
       localStorage.setItem('userData', JSON.stringify(userData));
-      analyzeData(userData);
+      sendChatMessage(`Health data saved. HRV: ${userData.hrv}ms, Glucose: ${userData.blood_glucose}mg/dL.`);
     }
 
-    // Analyze the data through Afiba's avatar
-    function analyzeData(data) {
-      const analysis = `Food: ${data.food}, Supplements: ${data.supplements}, Sleep: ${data.sleep} hours, Exercise: ${data.exercise} minutes.`;
-      alert(`Afiba is analyzing: ${analysis}`);
-      // Logic for analysis (this can be expanded later)
+    function sendChatMessage(message) {
+      const chatbox = document.getElementById('chatbox');
+      chatbox.innerHTML += `<p><strong>Afiba:</strong> ${message}</p>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+      speakText(message);
     }
 
-    // Initialize app
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (message === "") return;
+
+      document.getElementById('chatbox').innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+      input.value = "";
+
+      if (message.includes("how are you")) {
+        sendChatMessage("I'm great! How can I assist with your health today?");
+      } else {
+        sendChatMessage("Interesting! Tell me more.");
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+
+    function speakText(text) {
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "en-US";
+      speech.rate = 1;
+      window.speechSynthesis.speak(speech);
+    }
+
+    function startVoiceRecognition() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const voiceInput = event.results[0][0].transcript;
+        document.getElementById('userInput').value = voiceInput;
+        sendMessage();
+      };
+
+      recognition.onerror = function(event) {
+        sendChatMessage("Sorry, I didn't catch that.");
+      };
+    }
+
     window.onload = function() {
       const savedData = JSON.parse(localStorage.getItem('userData'));
       if (savedData) {
@@ -107,10 +183,9 @@
   </script>
 
   <script>
-    // Service Worker for PWA functionality
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
+        console.log('Service Worker registered:', registration.scope);
       }).catch((error) => {
         console.log('Service Worker registration failed:', error);
       });
@@ -118,39 +193,3 @@
   </script>
 </body>
 </html>
-
-<!-- Manifest -->
-<script type="application/json" id="manifest">
-  {
-    "name": "FutureTech Health App",
-    "short_name": "Health App",
-    "description": "Track and analyze health data with Afiba's chatbot.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#4CAF50",
-    "icons": [
-      {
-        "src": "/assets/icon.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/assets/icon-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ]
-  }
-</script>
-
-<!-- Service Worker -->
-<script type="text/javascript" id="service-worker">
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-      console.log('Service Worker registered with scope: ', registration.scope);
-    }).catch(function(error) {
-      console.log('Service Worker registration failed: ', error);
-    });
-  }
-</script>

@@ -265,9 +265,37 @@
         })
       });
       const data = await response.json();
-      return data[0]?.generated_text || "Sorry, I didn't quite understand that.";
+      return data.choices[0].message.content;
     }
 
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      const userInput = document.getElementById('userInput').value;
+      if (userInput) {
+        sendChatMessage(userInput);
+        document.getElementById('userInput').value = '';
+      }
+    }
+
+    // Voice recognition function
+    function startVoiceRecognition() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('userInput').value = transcript;
+        sendMessage();
+      };
+    }
+
+    // Save biomarker data
     function saveData() {
       userData.food = document.getElementById('food').value;
       userData.supplements = document.getElementById('supplements').value;
@@ -279,14 +307,15 @@
       userData.vitamin_d = document.getElementById('vitamin_d').value;
       userData.cholesterol = document.getElementById('cholesterol').value;
       userData.blood_pressure = document.getElementById('blood_pressure').value;
-      alert("Biomarker data saved!");
+
+      alert('Biomarker data saved successfully!');
     }
 
+    // Function to speak text
     function speakText(text) {
       const utterance = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance);
     }
-
   </script>
 </body>
 </html>

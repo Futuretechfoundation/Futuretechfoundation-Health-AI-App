@@ -1,608 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FutureTech Health App</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#121212">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <style>
-    :root {
-      --primary-color: #4CAF50;
-      --secondary-color: #FF9800;
-      --background-dark: #121212;
-      --card-background: #1e1e1e;
-      --input-background: #333;
-      --text-color: #fff;
-      --border-radius: 16px;
-      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      --transition: all 0.3s ease;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: var(--background-dark);
-      color: var(--text-color);
-      display: flex;
-      flex-direction: column;
-      touch-action: manipulation;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-    }
-
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-      max-width: 100%;
-      padding: 12px;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    #afiba-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary-color);
-    }
-
-    .header-text {
-      flex: 1;
-    }
-
-    .header-text h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .header-text p {
-      margin: 2px 0 0;
-      font-size: 12px;
-      opacity: 0.7;
-    }
-
-    .tab-nav {
-      display: flex;
-      margin: 8px 0;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 4px;
-    }
-
-    .tab-button {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text-color);
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      opacity: 0.7;
-      transition: var(--transition);
-    }
-
-    .tab-button.active {
-      background: rgba(255,255,255,0.1);
-      opacity: 1;
-    }
-
-    .tab-content {
-      flex: 1;
-      overflow: hidden;
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .tab-content.active {
-      display: flex;
-    }
-
-    #chatbox {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255,255,255,0.2) transparent;
-      margin-bottom: 8px;
-    }
-
-    #chatbox::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    #chatbox::-webkit-scrollbar-thumb {
-      background-color: rgba(255,255,255,0.2);
-      border-radius: 4px;
-    }
-
-    .message {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 18px;
-      margin-bottom: 2px;
-      word-break: break-word;
-      animation: fadeIn 0.3s ease;
-      line-height: 1.4;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message.user {
-      background: var(--primary-color);
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-
-    .message.bot {
-      background: rgba(255,255,255,0.1);
-      color: var(--text-color);
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-
-    .message-time {
-      font-size: 10px;
-      opacity: 0.6;
-      margin-top: 4px;
-      text-align: right;
-    }
-
-    .input-area {
-      display: flex;
-      gap: 8px;
-      padding: 8px 0;
-      position: relative;
-    }
-
-    #userInput {
-      flex: 1;
-      background: var(--input-background);
-      color: var(--text-color);
-      border: none;
-      border-radius: 24px;
-      padding: 12px 16px;
-      font-size: 16px;
-      outline: none;
-      transition: var(--transition);
-    }
-
-    #userInput:focus {
-      box-shadow: 0 0 0 2px var(--primary-color);
-    }
-
-    .icon-button {
-      width: 48px;
-      height: 48px;
-      border: none;
-      border-radius: 50%;
-      background: var(--primary-color);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 20px;
-    }
-
-    .icon-button:active {
-      transform: scale(0.92);
-    }
-
-    #voice-btn {
-      background: var(--secondary-color);
-    }
-
-    #voice-btn.recording {
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); background: #f44336; }
-      50% { transform: scale(1.05); background: #f44336; }
-      100% { transform: scale(1); background: #f44336; }
-    }
-
-    .data-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 12px 0;
-      overflow-y: auto;
-      height: 100%;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 14px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.8);
-    }
-
-    .form-group input {
-      background: var(--input-background);
-      color: var(--text-color);
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 16px;
-      outline: none;
-      transition: var(--transition);
-    }
-
-    .form-group input:focus {
-      box-shadow: 0 0 0 2px var(--primary-color);
-    }
-
-    .form-group input::placeholder {
-      color: rgba(255,255,255,0.4);
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .save-button {
-      background: var(--secondary-color);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-top: 8px;
-      margin-bottom: 16px;
-    }
-
-    .save-button:active {
-      transform: scale(0.98);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 24px;
-      font-size: 14px;
-      font-weight: 500;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-      text-align: center;
-      max-width: 80%;
-    }
-
-    .toast.show {
-      opacity: 1;
-    }
-
-    #dashboard {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 12px 0;
-      overflow-y: auto;
-      height: 100%;
-    }
-
-    .dashboard-card {
-      background: var(--card-background);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      box-shadow: var(--box-shadow);
-    }
-
-    .dashboard-card h3 {
-      margin: 0 0 12px;
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .metric-item {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .metric-value {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--primary-color);
-      margin-bottom: 4px;
-    }
-
-    .metric-label {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-
-    .trend-indicator {
-      display: inline-block;
-      margin-left: 4px;
-      font-size: 14px;
-    }
-
-    .trend-up {
-      color: #4CAF50;
-    }
-
-    .trend-down {
-      color: #f44336;
-    }
-    
-    /* Loading indicator */
-    .typing-indicator {
-      display: flex;
-      padding: 10px;
-      gap: 4px;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .typing-indicator.visible {
-      opacity: 1;
-    }
-    
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
-      animation: typingBounce 1.4s infinite ease-in-out;
-    }
-    
-    .typing-dot:nth-child(1) { animation-delay: 0s; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    
-    @keyframes typingBounce {
-      0%, 80%, 100% { transform: scale(0.6); }
-      40% { transform: scale(1); }
-    }
-
-    @media (max-height: 600px) {
-      .header {
-        padding-bottom: 8px;
-      }
-      
-      #afiba-avatar {
-        width: 40px;
-        height: 40px;
-      }
-      
-      .header-text h1 {
-        font-size: 16px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afiba - FutureTech Health Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .card {
+            background: #1e1e1e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        canvas {
+            background: #222;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="app-container">
-    <div class="header">
-      <img id="afiba-avatar" src="images/Afiba.jpg" alt="Afiba">
-      <div class="header-text">
-        <h1>FutureTech Health</h1>
-        <p>Your AI health assistant</p>
-      </div>
+    <div class="container">
+        <h1>Afiba - FutureTech Health</h1>
+        <button onclick="fetchHealthData()">Sync Health Data</button>
+        
+        <div class="card">
+            <h3>Biomarkers</h3>
+            <p>❤️ Heart Rate: <span id="heartRate">--</span> BPM</p>
+            <p>📈 HRV: <span id="hrv">--</span> ms</p>
+            <p>🫁 VO2 Max: <span id="vo2max">--</span> ml/kg/min</p>
+            <p>🩸 Blood Glucose: <span id="glucose">--</span> mg/dL</p>
+            <p>⏳ Longevity Estimate: <span id="longevity">--</span> years</p>
+        </div>
+
+        <canvas id="healthChart"></canvas>
     </div>
 
-    <div class="tab-nav">
-      <button class="tab-button active" data-tab="chat">Chat</button>
-      <button class="tab-button" data-tab="biodata">Data Entry</button>
-      <button class="tab-button" data-tab="dashboard">Dashboard</button>
-    </div>
+    <script>
+        const API_KEY = "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"; // Hugging Face API Key
 
-    <div id="chat-tab" class="tab-content active">
-      <div id="chatbox"></div>
-      <div class="typing-indicator">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      </div>
-      <div class="input-area">
-        <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
-        <button id="voice-btn" class="icon-button" onclick="toggleVoiceRecognition()">🎤</button>
-        <button id="send-btn" class="icon-button" onclick="sendMessage()">➤</button>
-      </div>
-    </div>
+        let healthChart = new Chart(document.getElementById("healthChart"), {
+            type: "line",
+            data: {
+                labels: ["Now", "-5min", "-10min"],
+                datasets: [{
+                    label: "Heart Rate (BPM)",
+                    data: [70, 72, 68],
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
 
-    <div id="biodata-tab" class="tab-content">
-      <div class="data-form">
-        <div class="form-group">
-          <label for="food">Food Intake</label>
-          <input type="text" id="food" placeholder="What did you eat today?">
-        </div>
-        <div class="form-group">
-          <label for="supplements">Supplements</label>
-          <input type="text" id="supplements" placeholder="What supplements did you take?">
-        </div>
-        <div class="form-group">
-          <label for="sleep">Sleep (hours)</label>
-          <input type="number" id="sleep" placeholder="Hours of sleep" min="0" max="24" step="0.5">
-        </div>
-        <div class="form-group">
-          <label for="exercise">Exercise (minutes)</label>
-          <input type="number" id="exercise" placeholder="Minutes of exercise" min="0" max="1000">
-        </div>
-        <div class="form-group">
-          <label for="hrv">Heart Rate Variability (ms)</label>
-          <input type="number" id="hrv" placeholder="HRV in milliseconds" min="0" max="200">
-        </div>
-        <div class
-transition: var(--transition);
-      text-align: center;
-    }
+        async function fetchHealthData() {
+            document.getElementById("heartRate").textContent = Math.floor(Math.random() * (100 - 60) + 60);
+            document.getElementById("hrv").textContent = Math.floor(Math.random() * (120 - 40) + 40);
+            document.getElementById("vo2max").textContent = Math.floor(Math.random() * (55 - 30) + 30);
+            document.getElementById("glucose").textContent = Math.floor(Math.random() * (120 - 80) + 80);
 
-    .save-button:active {
-      transform: scale(0.95);
-    }
+            estimateLongevity(document.getElementById("heartRate").textContent);
+        }
 
-  </style>
-</head>
-<body>
+        async function estimateLongevity(heartRate) {
+            try {
+                const response = await fetch("https://api-inference.huggingface.co/models/futuretech/longevity-predictor", {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ heartRate })
+                });
 
-  <div class="app-container">
-    
-    <div class="header">
-      <img id="afiba-avatar" src="avatar.png" alt="Afiba">
-      <div class="header-text">
-        <h1>FutureTech Health</h1>
-        <p>Your AI health companion</p>
-      </div>
-    </div>
-
-    <div class="tab-nav">
-      <button class="tab-button active" onclick="switchTab('chat')">Chat</button>
-      <button class="tab-button" onclick="switchTab('data')">Health Data</button>
-    </div>
-
-    <div id="chat" class="tab-content active">
-      <div id="chatbox"></div>
-      <div class="input-area">
-        <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
-        <button class="icon-button" onclick="sendMessage()">&#x27A4;</button>
-        <button class="icon-button" id="voice-btn" onclick="toggleVoice()">🎤</button>
-      </div>
-    </div>
-
-    <div id="data" class="tab-content">
-      <div class="data-form">
-        <div class="form-group">
-          <label for="heartRate">Heart Rate (bpm)</label>
-          <input type="number" id="heartRate" placeholder="Enter your heart rate">
-        </div>
-        <div class="form-group">
-          <label for="bloodPressure">Blood Pressure (mmHg)</label>
-          <input type="text" id="bloodPressure" placeholder="e.g., 120/80">
-        </div>
-        <div class="form-group">
-          <label for="steps">Steps Today</label>
-          <input type="number" id="steps" placeholder="Enter step count">
-        </div>
-        <button class="save-button" onclick="saveHealthData()">Save Data</button>
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
-    }
-
-    function handleKeyPress(event) {
-      if (event.key === "Enter") {
-        sendMessage();
-      }
-    }
-
-    function sendMessage() {
-      let input = document.getElementById("userInput");
-      let messageText = input.value.trim();
-      if (messageText === "") return;
-
-      let chatbox = document.getElementById("chatbox");
-      let userMessage = `<div class="message user">${messageText}<div class="message-time">${new Date().toLocaleTimeString()}</div></div>`;
-      chatbox.innerHTML += userMessage;
-      input.value = "";
-      chatbox.scrollTop = chatbox.scrollHeight;
-
-      setTimeout(() => {
-        let botReply = `<div class="message bot">I'm here to help!<div class="message-time">${new Date().toLocaleTimeString()}</div></div>`;
-        chatbox.innerHTML += botReply;
-        chatbox.scrollTop = chatbox.scrollHeight;
-      }, 1000);
-    }
-
-    function toggleVoice() {
-      let voiceBtn = document.getElementById("voice-btn");
-      voiceBtn.classList.toggle("recording");
-
-      if (voiceBtn.classList.contains("recording")) {
-        voiceBtn.innerHTML = "⏺";
-        console.log("Voice recording started...");
-      } else {
-        voiceBtn.innerHTML = "🎤";
-        console.log("Voice recording stopped.");
-      }
-    }
-
-    function saveHealthData() {
-      let heartRate = document.getElementById("heartRate").value;
-      let bloodPressure = document.getElementById("bloodPressure").value;
-      let steps = document.getElementById("steps").value;
-
-      if (!heartRate || !bloodPressure || !steps) {
-        alert("Please fill in all health data fields.");
-        return;
-      }
-
-      console.log("Health Data Saved:", { heartRate, bloodPressure, steps });
-      alert("Health data saved successfully!");
-    }
-  </script>
-
+                const prediction = await response.json();
+                document.getElementById("longevity").textContent = prediction.estimated_years || "--";
+            } catch (error) {
+                console.error("Longevity estimation error:", error);
+            }
+        }
+    </script>
 </body>
-  </html>
+</html>

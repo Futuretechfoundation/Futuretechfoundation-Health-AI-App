@@ -1,113 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Afiba - FutureTech Health Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-        }
-        .card {
-            background: #1e1e1e;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 10px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        canvas {
-            background: #222;
-            border-radius: 10px;
-            padding: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FutureTech Health - Afiba AI</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>
+    const HF_API_KEY = "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";  // Store securely
+    async function queryHuggingFace(message) {
+      try {
+        const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
+          method: "POST",
+          headers: { 
+            "Authorization": `Bearer ${HF_API_KEY}`, 
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify({ inputs: message }),
+        });
+        const result = await response.json();
+        return result.length ? result[0].generated_text : "I'm still learning. Can you rephrase that?";
+      } catch (error) {
+        return "AI is currently unavailable. Please try again later.";
+      }
+    }
+
+    async function estimateLongevity() {
+      let age = parseInt(document.getElementById("epigeneticAge").value) || 30;
+      let vo2 = parseFloat(document.getElementById("vo2max").value) || 40;
+      let hrv = parseInt(document.getElementById("hrv").value) || 50;
+
+      let predictedLifespan = 80 + (vo2 - 35) * 0.5 + (hrv - 50) * 0.3 - (age - 30) * 0.8;
+      predictedLifespan = Math.max(50, Math.min(predictedLifespan, 120));
+
+      document.getElementById("longevityEstimate").textContent = `${Math.round(predictedLifespan)} years`;
+    }
+
+    function connectSmartDevice() {
+      alert("Connecting to Apple Health / Fitbit / Oura...");
+      // Implement device API calls here (OAuth required)
+    }
+  </script>
+  <style>
+    /* Dark mode, mobile-friendly UI */
+    :root {
+      --primary-color: #4CAF50;
+      --secondary-color: #FF9800;
+      --background-dark: #121212;
+      --card-background: #1e1e1e;
+      --input-background: #333;
+      --text-color: #fff;
+      --border-radius: 16px;
+    }
+    body { font-family: Arial, sans-serif; background: var(--background-dark); color: var(--text-color); margin: 0; padding: 0; }
+    .app-container { display: flex; flex-direction: column; height: 100vh; padding: 12px; }
+    .tab-nav { display: flex; background: #222; border-radius: 12px; padding: 4px; }
+    .tab-button { flex: 1; border: none; background: none; color: white; padding: 10px; opacity: 0.7; }
+    .tab-button.active { background: rgba(255,255,255,0.1); opacity: 1; }
+    .tab-content { display: none; padding: 12px; }
+    .tab-content.active { display: block; }
+    #chatbox { overflow-y: auto; max-height: 400px; padding: 10px; }
+    .message { padding: 10px; border-radius: 12px; margin-bottom: 8px; }
+    .message.user { background: var(--primary-color); text-align: right; }
+    .message.bot { background: var(--card-background); }
+    .input-area { display: flex; gap: 8px; padding: 8px 0; }
+    input { flex: 1; padding: 12px; border-radius: 12px; background: var(--input-background); color: white; border: none; }
+    .icon-button { background: var(--primary-color); border: none; padding: 12px; border-radius: 50%; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Afiba - FutureTech Health</h1>
-        <button onclick="fetchHealthData()">Sync Health Data</button>
-        
-        <div class="card">
-            <h3>Biomarkers</h3>
-            <p>❤️ Heart Rate: <span id="heartRate">--</span> BPM</p>
-            <p>📈 HRV: <span id="hrv">--</span> ms</p>
-            <p>🫁 VO2 Max: <span id="vo2max">--</span> ml/kg/min</p>
-            <p>🩸 Blood Glucose: <span id="glucose">--</span> mg/dL</p>
-            <p>⏳ Longevity Estimate: <span id="longevity">--</span> years</p>
-        </div>
 
-        <canvas id="healthChart"></canvas>
+  <div class="app-container">
+    <div class="tab-nav">
+      <button class="tab-button active" onclick="openTab('chat')">Chat</button>
+      <button class="tab-button" onclick="openTab('data')">Health Data</button>
+      <button class="tab-button" onclick="openTab('dashboard')">Dashboard</button>
     </div>
 
-    <script>
-        const API_KEY = "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"; // Hugging Face API Key
+    <!-- Chatbot Tab -->
+    <div id="chat" class="tab-content active">
+      <div id="chatbox"></div>
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="Type a message...">
+        <button class="icon-button" onclick="sendMessage()">▶</button>
+      </div>
+    </div>
 
-        let healthChart = new Chart(document.getElementById("healthChart"), {
-            type: "line",
-            data: {
-                labels: ["Now", "-5min", "-10min"],
-                datasets: [{
-                    label: "Heart Rate (BPM)",
-                    data: [70, 72, 68],
-                    backgroundColor: "rgba(255, 99, 132, 0.2)",
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    borderWidth: 2,
-                    fill: true
-                }]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: false }
-                }
-            }
-        });
+    <!-- Data Entry Tab (Brian Johnson’s Biomarkers) -->
+    <div id="data" class="tab-content">
+      <h2>Biomarker Data Entry</h2>
+      <label>Heart Rate (BPM)</label>
+      <input type="number" id="heartRate" placeholder="Enter heart rate">
+      
+      <label>Blood Pressure</label>
+      <input type="text" id="bloodPressure" placeholder="e.g., 120/80">
+      
+      <label>Glucose Level</label>
+      <input type="number" id="glucose" placeholder="mg/dL">
+      
+      <label>VO2 Max</label>
+      <input type="number" id="vo2max" placeholder="Enter VO2 Max">
 
-        async function fetchHealthData() {
-            document.getElementById("heartRate").textContent = Math.floor(Math.random() * (100 - 60) + 60);
-            document.getElementById("hrv").textContent = Math.floor(Math.random() * (120 - 40) + 40);
-            document.getElementById("vo2max").textContent = Math.floor(Math.random() * (55 - 30) + 30);
-            document.getElementById("glucose").textContent = Math.floor(Math.random() * (120 - 80) + 80);
+      <label>Heart Rate Variability (HRV)</label>
+      <input type="number" id="hrv" placeholder="Enter HRV (ms)">
 
-            estimateLongevity(document.getElementById("heartRate").textContent);
-        }
+      <label>Epigenetic Age</label>
+      <input type="number" id="epigeneticAge" placeholder="Enter Age">
 
-        async function estimateLongevity(heartRate) {
-            try {
-                const response = await fetch("https://api-inference.huggingface.co/models/futuretech/longevity-predictor", {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${API_KEY}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ heartRate })
-                });
+      <button onclick="saveData()">Save</button>
+      <button onclick="connectSmartDevice()">Connect Smart Device</button>
+    </div>
 
-                const prediction = await response.json();
-                document.getElementById("longevity").textContent = prediction.estimated_years || "--";
-            } catch (error) {
-                console.error("Longevity estimation error:", error);
-            }
-        }
-    </script>
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content">
+      <h2>Health Dashboard</h2>
+      <p><strong>Heart Rate:</strong> <span id="dashHeart">-</span> BPM</p>
+      <p><strong>Blood Pressure:</strong> <span id="dashBP">-</span></p>
+      <p><strong>Glucose Level:</strong> <span id="dashGlucose">-</span> mg/dL</p>
+      <p><strong>VO2 Max:</strong> <span id="dashVO2">-</span></p>
+      <p><strong>HRV:</strong> <span id="dashHRV">-</span> ms</p>
+      <p><strong>Epigenetic Age:</strong> <span id="dashAge">-</span></p>
+      <p><strong>Predicted Longevity:</strong> <span id="longevityEstimate">-</span></p>
+      <button onclick="estimateLongevity()">Estimate Longevity</button>
+    </div>
+  </div>
+
+  <script>
+    function saveData() {
+      document.getElementById("dashHeart").textContent = document.getElementById("heartRate").value || "-";
+      document.getElementById("dashBP").textContent = document.getElementById("bloodPressure").value || "-";
+      document.getElementById("dashGlucose").textContent = document.getElementById("glucose").value || "-";
+      document.getElementById("dashVO2").textContent = document.getElementById("vo2max").value || "-";
+      document.getElementById("dashHRV").textContent = document.getElementById("hrv").value || "-";
+      document.getElementById("dashAge").textContent = document.getElementById("epigeneticAge").value || "-";
+      alert("Data Saved!");
+    }
+  </script>
+
 </body>
 </html>

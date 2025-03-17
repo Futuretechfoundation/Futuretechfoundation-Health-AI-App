@@ -488,3 +488,121 @@
           <input type="number" id="hrv" placeholder="HRV in milliseconds" min="0" max="200">
         </div>
         <div class
+transition: var(--transition);
+      text-align: center;
+    }
+
+    .save-button:active {
+      transform: scale(0.95);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <div class="header">
+      <img id="afiba-avatar" src="avatar.png" alt="Afiba">
+      <div class="header-text">
+        <h1>FutureTech Health</h1>
+        <p>Your AI health companion</p>
+      </div>
+    </div>
+
+    <div class="tab-nav">
+      <button class="tab-button active" onclick="switchTab('chat')">Chat</button>
+      <button class="tab-button" onclick="switchTab('data')">Health Data</button>
+    </div>
+
+    <div id="chat" class="tab-content active">
+      <div id="chatbox"></div>
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+        <button class="icon-button" onclick="sendMessage()">&#x27A4;</button>
+        <button class="icon-button" id="voice-btn" onclick="toggleVoice()">🎤</button>
+      </div>
+    </div>
+
+    <div id="data" class="tab-content">
+      <div class="data-form">
+        <div class="form-group">
+          <label for="heartRate">Heart Rate (bpm)</label>
+          <input type="number" id="heartRate" placeholder="Enter your heart rate">
+        </div>
+        <div class="form-group">
+          <label for="bloodPressure">Blood Pressure (mmHg)</label>
+          <input type="text" id="bloodPressure" placeholder="e.g., 120/80">
+        </div>
+        <div class="form-group">
+          <label for="steps">Steps Today</label>
+          <input type="number" id="steps" placeholder="Enter step count">
+        </div>
+        <button class="save-button" onclick="saveHealthData()">Save Data</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      let input = document.getElementById("userInput");
+      let messageText = input.value.trim();
+      if (messageText === "") return;
+
+      let chatbox = document.getElementById("chatbox");
+      let userMessage = `<div class="message user">${messageText}<div class="message-time">${new Date().toLocaleTimeString()}</div></div>`;
+      chatbox.innerHTML += userMessage;
+      input.value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      setTimeout(() => {
+        let botReply = `<div class="message bot">I'm here to help!<div class="message-time">${new Date().toLocaleTimeString()}</div></div>`;
+        chatbox.innerHTML += botReply;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }, 1000);
+    }
+
+    function toggleVoice() {
+      let voiceBtn = document.getElementById("voice-btn");
+      voiceBtn.classList.toggle("recording");
+
+      if (voiceBtn.classList.contains("recording")) {
+        voiceBtn.innerHTML = "⏺";
+        console.log("Voice recording started...");
+      } else {
+        voiceBtn.innerHTML = "🎤";
+        console.log("Voice recording stopped.");
+      }
+    }
+
+    function saveHealthData() {
+      let heartRate = document.getElementById("heartRate").value;
+      let bloodPressure = document.getElementById("bloodPressure").value;
+      let steps = document.getElementById("steps").value;
+
+      if (!heartRate || !bloodPressure || !steps) {
+        alert("Please fill in all health data fields.");
+        return;
+      }
+
+      console.log("Health Data Saved:", { heartRate, bloodPressure, steps });
+      alert("Health data saved successfully!");
+    }
+  </script>
+
+</body>
+  </html>
